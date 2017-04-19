@@ -103,11 +103,28 @@ public class DBUtil {
             for (Field field : fields) {
                 if(field.isAnnotationPresent(Column.class)){
                     Column column = field.getAnnotation(Column.class);
-                    String idName = column.name();
-                    if(TextUtil.isValidate(idName)){
-                        return idName;
+                    if(column.id()) {
+                        String idName = column.name();
+                        if (TextUtil.isValidate(idName)) {
+                            return idName;
+                        }
+                        return field.getName().toLowerCase();
                     }
-                    return field.getName();
+                }
+            }
+        }
+        return null;
+    }
+
+    public static String getIdFieldName(Class<?> clz){
+        if(clz.isAnnotationPresent(Table.class)){
+            Field[] fields = clz.getDeclaredFields();
+            for (Field field : fields) {
+                if(field.isAnnotationPresent(Column.class)){
+                    Column column = field.getAnnotation(Column.class);
+                    if(column.id()) {
+                        return field.getName();
+                    }
                 }
             }
         }

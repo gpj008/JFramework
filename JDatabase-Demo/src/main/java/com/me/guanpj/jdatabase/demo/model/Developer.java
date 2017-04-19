@@ -13,24 +13,24 @@ import java.util.ArrayList;
 
 @Table(name = "developer")
 public class Developer implements Serializable{
-    @Column(id = true)
+    @Column(id = true, name = "developerID")
     private String id;
-    @Column
+    @Column(name = "developerName")
     private String name;
     @Column
     private int age;
     @Column(type = Column.ColumnType.SERIALIZABLE)
     private ArrayList<Skill> skills;
-    /*@Column(type = Column.ColumnType.TONE, autofresh = true)
-    private Company company;*/
+    @Column(type = Column.ColumnType.TONE, autofresh = false)
+    private Company company;
 
-   /*public Company getCompany() {
+   public Company getCompany() {
         return company;
     }
 
     public void setCompany(Company company) {
         this.company = company;
-    }*/
+    }
 
     public ArrayList<Skill> getSkills() {
         return skills;
@@ -66,8 +66,7 @@ public class Developer implements Serializable{
 
     @Override
     public String toString() {
-        return "id:" + id + ",name:" + name + ",age:" + age + ",skills:" + JsonUtil.toJson(skills);
-        /*return "id:" + id + ",name:" + name + ",age:" + age + ",skills:" + JsonUtil.toJson(skills) + ",company:" + (company != null ? company
-                .toString() : "null");*/
+        return "id:" + id + ",name:" + name + ",age:" + age + ",skills:" + JsonUtil.toJson(skills) + ",company:" + (company != null ? company
+                .toString() : "null");
     }
 }

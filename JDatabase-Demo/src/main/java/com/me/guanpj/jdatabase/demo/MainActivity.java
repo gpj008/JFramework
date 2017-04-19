@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.me.guanpj.jdatabase.DBManager;
+import com.me.guanpj.jdatabase.demo.model.Company;
 import com.me.guanpj.jdatabase.demo.model.Developer;
 import com.me.guanpj.jdatabase.demo.model.Skill;
 import com.me.guanpj.jdatabase.utility.Trace;
@@ -26,21 +27,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void add() {
         Developer developer = new Developer();
         developer.setId("00001");
-        developer.setName("Stay");
+        developer.setName("Jie");
         developer.setAge(17);
-        Skill skill = new Skill();
-        skill.setName("coding");
-        skill.setDesc("android");
+
+        Skill skill1 = new Skill();
+        skill1.setName("coding");
+        skill1.setDesc("android");
+
+        Skill skill2 = new Skill();
+        skill2.setName("sport");
+        skill2.setDesc("basketball");
         ArrayList<Skill> skills = new ArrayList<Skill>();
-        skills.add(skill);
+        skills.add(skill1);
+        skills.add(skill2);
         developer.setSkills(skills);
+
+        Company company = new Company();
+        company.setId("001");
+        company.setName("gpj");
+
+        developer.setCompany(company);
+
         DBManager.getInstance().newOrUpdate(developer);
     }
 
     public void queryCompanyById() {
         Developer developer = DBManager.getInstance().queryById(Developer.class, "00001");
         if (developer != null) {
-            Trace.d(developer.toString());
+            Trace.e(developer.toString());
         }
     }
 
