@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import com.me.guanpj.jdatabase.DBManager;
+import com.me.guanpj.jdatabase.DatabaseManager;
 import com.me.guanpj.jdatabase.demo.model.Company;
 import com.me.guanpj.jdatabase.demo.model.Developer;
 import com.me.guanpj.jdatabase.demo.model.Skill;
@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.mDbAddBtn).setOnClickListener(this);
         findViewById(R.id.mDbDeleteBtn).setOnClickListener(this);
         findViewById(R.id.mDbQueryBtn).setOnClickListener(this);
-        DBManager.init(getApplicationContext(), new DatabaseHelper(getApplicationContext()));
+        DatabaseManager.init(getApplicationContext(), new DatabaseHelper(getApplicationContext()));
     }
 
     public void add() {
@@ -67,11 +67,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         company.setAddress("Shenzhen");
         company.setDevelopers(developers);
 
-        DBManager.getInstance().newOrUpdate(company);
+        //DBManager.getInstance().newOrUpdate(company);
+        DatabaseManager.getInstance().getDao(Company.class).newOrUpdate(company);
     }
 
     public void queryCompanyById() {
-        Company company = DBManager.getInstance().queryById(Company.class, "001");
+        //Company company = DBManager.getInstance().queryById(Company.class, "001");
+        Company company = DatabaseManager.getInstance().getDao(Company.class).queryById("001");
         if (company != null) {
             Trace.e(company.toString());
         }
@@ -80,7 +82,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void deleteCompanyById() {
         Company company = new Company();
         company.setId("001");
-        DBManager.getInstance().delete(company);
+        //DBManager.getInstance().delete(company);
+        DatabaseManager.getInstance().getDao(Company.class).delete(company);
     }
 
     @Override

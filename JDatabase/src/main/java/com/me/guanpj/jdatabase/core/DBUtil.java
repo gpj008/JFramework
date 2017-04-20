@@ -149,4 +149,17 @@ public class DBUtil {
     public static String getAssosiarionTableName(Class<?> clz, String association) {
         return getTableName(clz) + "_" + association;
     }
+
+    public static ArrayList<Field> getForeignFields(Field[] mColumnFields) {
+        ArrayList<Field> foreignFields = new ArrayList<>();
+        for (Field field : mColumnFields) {
+            if(field.isAnnotationPresent(Column.class)) {
+                Column column = field.getAnnotation(Column.class);
+                if(column.type() == Column.ColumnType.TMANY){
+                    foreignFields.add(field);
+                }
+            }
+        }
+        return foreignFields;
+    }
 }
