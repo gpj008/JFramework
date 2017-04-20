@@ -13,15 +13,15 @@ import java.util.ArrayList;
 
 @Table(name = "developer")
 public class Developer implements Serializable{
-    @Column(id = true, name = "developerID")
+    @Column(id = true, name = "developer_id")
     private String id;
-    @Column(name = "developerName")
+    @Column(name = "developer_name")
     private String name;
     @Column
     private int age;
     @Column(type = Column.ColumnType.SERIALIZABLE)
     private ArrayList<Skill> skills;
-    @Column(type = Column.ColumnType.TONE, autofresh = false)
+    @Column(type = Column.ColumnType.TONE, autofresh = true)
     private Company company;
 
    public Company getCompany() {

@@ -13,7 +13,9 @@ import com.me.guanpj.jdatabase.utility.SerializeUtil;
 import com.me.guanpj.jdatabase.utility.TextUtil;
 
 import java.lang.reflect.Field;
-import java.util.Objects;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Jie on 2017/4/19.
@@ -71,12 +73,42 @@ public class DBManager {
                                 if(tone == null){
                                     continue;
                                 }
+                                if(column.autofresh()) {
+                                    newOrUpdate(tone);
+                                }
                                 if(tone.getClass().isAnnotationPresent(Table.class)) {
-                                    String idFieldNameName = DBUtil.getIdFieldName(tone.getClass());
-                                    Field toneIdField = tone.getClass().getDeclaredField(idFieldNameName);
+                                    String toneIdFieldName = DBUtil.getIdFieldName(tone.getClass());
+                                    Field toneIdField = tone.getClass().getDeclaredField(toneIdFieldName);
                                     if(toneIdField != null) {
                                         toneIdField.setAccessible(true);
                                         values.put(DBUtil.getColumnName(field), toneIdField.get(tone).toString());
+                                    }
+                                }
+                            } else if(myType == Column.ColumnType.TMANY) {
+                                String mainTableIdFieldName = DBUtil.getIdFieldName(t.getClass());
+                                Field mainTableIdField = t.getClass().getDeclaredField(mainTableIdFieldName);
+                                String mainTableIdValue = null;
+                                if(mainTableIdField != null){
+                                    mainTableIdField.setAccessible(true);
+                                    mainTableIdValue = mainTableIdField.get(t).toString();
+                                    mDatabase.delete(DBUtil.getAssosiarionTableName(t.getClass(), field.getName()), DBUtil.PK1 + "=?", new String[]{mainTableIdValue});
+                                }
+                                List<Object> tmany = (List<Object>) field.get(t);
+                                if(tmany != null && tmany.size() > 0) {
+                                    ContentValues assosiationValues = new ContentValues();
+                                    for (Object object : tmany) {
+                                        if(column.autofresh()) {
+                                            newOrUpdate(object);
+                                        }
+                                        assosiationValues.clear();
+                                        assosiationValues.put(DBUtil.PK1, mainTableIdValue);
+                                        String tmanyIdFieldName = DBUtil.getIdFieldName(object.getClass());
+                                        Field tmanyIdField = object.getClass().getDeclaredField(tmanyIdFieldName);
+                                        if(tmanyIdField != null) {
+                                            tmanyIdField.setAccessible(true);
+                                            assosiationValues.put(DBUtil.PK2, tmanyIdField.get(object).toString());
+                                        }
+                                        mDatabase.replace(DBUtil.getAssosiarionTableName(t.getClass(), field.getName()), null, assosiationValues);
                                     }
                                 }
                             }
@@ -92,12 +124,12 @@ public class DBManager {
 
     public <T> void delete(T t) {
         try {
-            String idColumnName = DBUtil.getIdColumnName(t.getClass());
-            Field idField = t.getClass().getDeclaredField(idColumnName);
+            String idFieldName = DBUtil.getIdFieldName(t.getClass());
+            Field idField = t.getClass().getDeclaredField(idFieldName);
             if (idField != null) {
                 idField.setAccessible(true);
                 String idValue = idField.get(t).toString();
-                mDatabase.delete(DBUtil.getTableName(t.getClass()), idColumnName + "=?", new String[]{idValue});
+                mDatabase.delete(DBUtil.getTableName(t.getClass()), DBUtil.getIdColumnName(t.getClass()) + "=?", new String[]{idValue});
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -138,13 +170,35 @@ public class DBManager {
                                 } else {
                                     if(fieldType.isAnnotationPresent(Table.class)){
                                         tone = fieldType.newInstance();
-                                        String idFieldName = DBUtil.getIdFieldName(tone.getClass());
-                                        Field toneIdField = tone.getClass().getDeclaredField(idFieldName);
+                                        String toneIdFieldName = DBUtil.getIdFieldName(tone.getClass());
+                                        Field toneIdField = tone.getClass().getDeclaredField(toneIdFieldName);
                                         toneIdField.setAccessible(true);
                                         toneIdField.set(tone, toneId);
                                     }
                                 }
                                 field.set(t, tone);
+                            } else if(myType == Column.ColumnType.TMANY) {
+                                Class relatedClass = (Class) ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];
+                                Cursor assosiationCursor = mDatabase.rawQuery("select * from " + DBUtil.getAssosiarionTableName(t.getClass(), field.getName()) +
+                                        " where " + DBUtil.PK1 + "=?", new String[]{id});
+                                ArrayList<Object> list = new ArrayList<>();
+                                while (assosiationCursor.moveToNext()) {
+                                    String assosiationId = assosiationCursor.getString(assosiationCursor.getColumnIndex(DBUtil.PK2));
+                                    Object relatedObject = null;
+                                    if(column.autofresh()) {
+                                        relatedObject = queryById(relatedClass, assosiationId);
+                                    } else {
+                                        if(relatedClass.isAnnotationPresent(Table.class)) {
+                                            relatedObject = relatedClass.newInstance();
+                                            String relatedObjectIdFieldName = DBUtil.getIdFieldName(relatedObject.getClass());
+                                            Field relatedObjectIdField = relatedObject.getClass().getDeclaredField(relatedObjectIdFieldName);
+                                            relatedObjectIdField.setAccessible(true);
+                                            relatedObjectIdField.set(relatedObject, assosiationId);
+                                        }
+                                    }
+                                    list.add(relatedObject);
+                                }
+                                field.set(t, list);
                             }
                         }
                     }

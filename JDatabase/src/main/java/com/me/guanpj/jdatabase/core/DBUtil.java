@@ -8,6 +8,7 @@ import com.me.guanpj.jdatabase.annotation.Table;
 import com.me.guanpj.jdatabase.utility.TextUtil;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 /**
  * Created by Jie on 2017/4/17.
@@ -15,20 +16,33 @@ import java.lang.reflect.Field;
 
 public class DBUtil {
 
+    public static final String PK1 = "pk1";
+    public static final String PK2 = "pk2";
+
     public static void createTable(SQLiteDatabase db, Class<?> clz) throws SQLiteException{
-        db.execSQL(getCreateTableStatement(clz));
+        ArrayList<String> statement = getCreateTableStatement(clz);
+        if(TextUtil.isValidate(statement)){
+            for (String s : statement) {
+                db.execSQL(s);
+            }
+        }
     }
 
     public static void dropTable(SQLiteDatabase db, Class<?> clz) throws SQLiteException{
         db.execSQL(getDropTableStatement(clz));
     }
 
-    private static String getCreateTableStatement(Class<?> clz) {
+    private static ArrayList<String> getCreateTableStatement(Class<?> clz) {
+        ArrayList<String> statement = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         if(clz.isAnnotationPresent(Table.class)){
             Field[] fields = clz.getDeclaredFields();
             for (Field field : fields) {
                 if(field.isAnnotationPresent(Column.class)){
+                    if(field.getAnnotation(Column.class).type() == Column.ColumnType.TMANY){
+                        statement.add("create table if not exists " + getAssosiarionTableName(clz, field.getName()) +
+                                "(" + PK1 + " TEXT, " + PK2 + " TEXT)");
+                    }
                     sb.append(getColumnStatement(field));
                     sb.append(",");
                 }
@@ -36,7 +50,8 @@ public class DBUtil {
             if (sb.length() > 0) {
                 sb.delete(sb.length() - 2, sb.length());
             }
-            return "create table if not exists " + getTableName(clz) + " (" + sb + " )";
+            statement.add("create table if not exists " + getTableName(clz) + " (" + sb + " )");
+            return statement;
         }
         return null;
     }
@@ -129,5 +144,9 @@ public class DBUtil {
             }
         }
         return null;
+    }
+
+    public static String getAssosiarionTableName(Class<?> clz, String association) {
+        return getTableName(clz) + "_" + association;
     }
 }

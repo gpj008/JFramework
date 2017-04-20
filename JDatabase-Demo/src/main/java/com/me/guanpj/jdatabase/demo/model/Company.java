@@ -12,9 +12,9 @@ import java.util.ArrayList;
 
 @Table(name = "company")
 public class Company {
-    @Column(id = true, name = "companyid")
+    @Column(id = true, name = "company_id")
     private String id;
-    @Column
+    @Column(name = "company_name")
     private String name;
     @Column
     private String url;
@@ -25,7 +25,7 @@ public class Company {
 
     private String group;
 
-    @Column(type = Column.ColumnType.TMANY,autofresh=true)
+    @Column(type = Column.ColumnType.TMANY, autofresh = true)
     private ArrayList<Developer> developers;
 
     public String getGroup() {
@@ -86,6 +86,6 @@ public class Company {
 
     @Override
     public String toString() {
-        return "id:" + id + ",name:" + name + ",url:" + url + ",tel:" + tel + ",address:" + address + ",developers" + (developers != null? JsonUtil.toJson(developers) :"null");
+        return "id:" + id + ",name:" + name + ",url:" + url + ",tel:" + tel + ",address:" + address + ",developers:" + (developers != null? JsonUtil.toJson(developers) :"null");
     }
 }
