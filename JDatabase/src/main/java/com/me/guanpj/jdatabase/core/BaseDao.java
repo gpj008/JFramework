@@ -134,7 +134,7 @@ public class BaseDao<T> {
         try {
             if (mIdField != null) {
                 String idValue = mIdField.get(t).toString();
-                mDatabase.delete(mTableName,  mIdColumnName + "=?", new String[]{idValue});
+                delete(idValue);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -142,9 +142,13 @@ public class BaseDao<T> {
     }
 
     public void delete(String id) {
-        delete(mTableName, mIdColumnName + "=?", new String[]{id});
-        for (Field foreignField : mForeignFields) {
-            delete(DBUtil.getAssosiarionTableName(mClz, foreignField.getName()), DBUtil.PK1 + "=?", new String[]{id});
+        try {
+            delete(mTableName, mIdColumnName + "=?", new String[]{id});
+            for (Field foreignField : mForeignFields) {
+                delete(DBUtil.getAssosiarionTableName(mClz, foreignField.getName()), DBUtil.PK1 + "=?", new String[]{id});
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
