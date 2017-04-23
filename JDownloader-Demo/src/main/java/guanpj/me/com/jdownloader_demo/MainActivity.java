@@ -12,12 +12,18 @@ import guanpj.me.com.jdownloader.Trace;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private DownloadManager mDownloadManager;
     private Button mButtonStart;
     private Button mButtonPause;
-    private DownloadManager mDownloadManager;
+    private Button mButtonCancel;
+    private DownloadEntry entry;
     private DataWacther mWacther = new DataWacther() {
         @Override
         protected void notifyUpdate(DownloadEntry object) {
+            entry = object;
+            if(entry.status == DownloadEntry.DownloadStatus.OnCancel) {
+                entry = null;
+            }
             Trace.e(object.toString());
         }
     };
@@ -30,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mButtonStart.setOnClickListener(this);
         mButtonPause = (Button) findViewById(R.id.btn_pause);
         mButtonPause.setOnClickListener(this);
+        mButtonCancel = (Button) findViewById(R.id.btn_cancel);
+        mButtonCancel.setOnClickListener(this);
         mDownloadManager = DownloadManager.getInstance(this);
 
     }
@@ -48,16 +56,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        DownloadEntry entry = new DownloadEntry();
-        entry.id = "1";
-        entry.name = "gpj";
-        entry.url = "http://api.stay4it.com/uploads/test.jpg";
+        if(entry == null) {
+            entry = new DownloadEntry();
+            entry.id = "1";
+            entry.name = "gpj";
+            entry.url = "http://api.stay4it.com/uploads/test.jpg";
+        }
         switch (v.getId()) {
             case R.id.btn_start:
                 mDownloadManager.add(entry);
                 break;
             case R.id.btn_pause:
-                mDownloadManager.pause(entry);
+                if(entry.status == DownloadEntry.DownloadStatus.OnDownload) {
+                    mDownloadManager.pause(entry);
+                } else if(entry.status == DownloadEntry.DownloadStatus.OnPause) {
+                    mDownloadManager.resume(entry);
+                }
+                break;
+            case R.id.btn_cancel:
+                mDownloadManager.cancel(entry);
                 break;
         }
     }

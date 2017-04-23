@@ -5,9 +5,10 @@ package guanpj.me.com.jdownloader;
  */
 
 public class DownloadTask implements Runnable {
+
     private final DownloadEntry entry;
     private boolean isPaused = false;
-    private boolean isCanceld = false;
+    private boolean isCanceled = false;
 
     public DownloadTask(DownloadEntry entry) {
         this.entry = entry;
@@ -23,13 +24,13 @@ public class DownloadTask implements Runnable {
         DataChanger.getInstance().postStatus(entry);
 
         entry.totalLength = 1024 * 100;
-        for (int i = 0; i < entry.totalLength; i++) {
+        for (int i = entry.currentLength; i < entry.totalLength; i++) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if(isPaused || isCanceld) {
+            if(isPaused || isCanceled) {
                 entry.status = isPaused ? DownloadEntry.DownloadStatus.OnPause : DownloadEntry.DownloadStatus.OnCancel;
                 DataChanger.getInstance().postStatus(entry);
                 return;
@@ -52,6 +53,6 @@ public class DownloadTask implements Runnable {
     }
 
     public void cancel() {
-        isCanceld = true;
+        isCanceled = true;
     }
 }
