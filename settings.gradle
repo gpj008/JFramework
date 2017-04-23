@@ -1,1 +1,1 @@
-include ':JHttp', ':JHttp-Demo', ':JDatabase', ':JDatabase-Demo'
+include ':JHttp', ':JHttp-Demo', ':JDatabase', ':JDatabase-Demo', ':JDownloader', ':JDownloader-Demo'
