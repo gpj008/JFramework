@@ -2,7 +2,6 @@ package guanpj.me.com.jdownloader;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 
 /**
  * Created by Jie on 2017/4/23.
@@ -52,11 +51,11 @@ public class DownloadManager {
         mContext.startService(intent);
     }
 
-    public void addObserver(DataWacther wacther) {
+    public void addObserver(DataWatcher wacther) {
         DataChanger.getInstance().addObserver(wacther);
     }
 
-    public void deleteObserver(DataWacther wacther) {
+    public void deleteObserver(DataWatcher wacther) {
         DataChanger.getInstance().deleteObserver(wacther);
     }
 }

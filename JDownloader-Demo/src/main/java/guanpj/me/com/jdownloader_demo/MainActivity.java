@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import guanpj.me.com.jdownloader.DataWacther;
+import guanpj.me.com.jdownloader.DataWatcher;
 import guanpj.me.com.jdownloader.DownloadEntry;
 import guanpj.me.com.jdownloader.DownloadManager;
 import guanpj.me.com.jdownloader.Trace;
@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button mButtonPause;
     private Button mButtonCancel;
     private DownloadEntry entry;
-    private DataWacther mWacther = new DataWacther() {
+    private DataWatcher mWacther = new DataWatcher() {
         @Override
         protected void notifyUpdate(DownloadEntry object) {
             entry = object;

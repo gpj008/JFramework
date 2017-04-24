@@ -2,7 +2,9 @@ package guanpj.me.com.jdownloader;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 
@@ -20,6 +22,13 @@ public class DownloadService extends Service {
 
     private Map<String, DownloadTask> mDownloadingTasks;
     private ExecutorService mExecutors;
+    private Handler mHander = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            DataChanger.getInstance().postStatus((DownloadEntry) msg.obj);
+        }
+    };
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -61,7 +70,7 @@ public class DownloadService extends Service {
     }
 
     private void startDownload(DownloadEntry entry) {
-        DownloadTask task = new DownloadTask(entry);
+        DownloadTask task = new DownloadTask(entry, mHander);
         mDownloadingTasks.put(entry.id, task);
         mExecutors.execute(task);
     }

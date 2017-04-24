@@ -7,7 +7,7 @@ import java.util.Observer;
  * Created by Jie on 2017/4/23.
  */
 
-public abstract class DataWacther implements Observer {
+public abstract class DataWatcher implements Observer {
     @Override
     public void update(Observable observable, Object object) {
         if(object instanceof DownloadEntry) {
