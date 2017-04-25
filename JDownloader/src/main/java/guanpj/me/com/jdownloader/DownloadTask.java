@@ -33,7 +33,7 @@ public class DownloadTask implements Runnable {
             handler.sendMessage(msg);
         }
 
-        entry.totalLength = 1024 * 15;
+        entry.totalLength = 1024 * 18;
         for (int i = entry.currentLength; i < entry.totalLength; i++) {
             try {
                 Thread.sleep(1000);
