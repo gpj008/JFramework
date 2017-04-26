@@ -11,8 +11,8 @@ public class DownloadTask implements Runnable {
 
     private final DownloadEntry entry;
     private Handler handler;
-    private boolean isPaused = false;
-    private boolean isCanceled = false;
+    private volatile boolean  isPaused = false;
+    private volatile boolean isCanceled = false;
 
     public DownloadTask(DownloadEntry entry, Handler handler) {
         this.entry = entry;
@@ -26,12 +26,7 @@ public class DownloadTask implements Runnable {
 
     public void start() {
         entry.status = DownloadEntry.DownloadStatus.OnDownload;
-        //DataChanger.getInstance().postStatus(entry);
-        if(handler != null) {
-            Message msg = handler.obtainMessage();
-            msg.obj = entry;
-            handler.sendMessage(msg);
-        }
+        notifyUpdate(entry, DownloadService.NOTIFY_DOWNLOADING);
 
         entry.totalLength = 1024 * 18;
         for (int i = entry.currentLength; i < entry.totalLength; i++) {
@@ -42,12 +37,7 @@ public class DownloadTask implements Runnable {
             }
             if(isPaused || isCanceled) {
                 entry.status = isPaused ? DownloadEntry.DownloadStatus.OnPause : DownloadEntry.DownloadStatus.OnCancel;
-                //DataChanger.getInstance().postStatus(entry);
-                if(handler != null) {
-                    Message msg = handler.obtainMessage();
-                    msg.obj = entry;
-                    handler.sendMessage(msg);
-                }
+                notifyUpdate(entry, DownloadService.NOTIFY_PAUSED_OR_CANCELLED);
                 return;
             }
             i += 1024;
@@ -61,12 +51,7 @@ public class DownloadTask implements Runnable {
         }
 
         entry.status = DownloadEntry.DownloadStatus.OnComplete;
-        //DataChanger.getInstance().postStatus(entry);
-        if(handler != null) {
-            Message msg = handler.obtainMessage();
-            msg.obj = entry;
-            handler.sendMessage(msg);
-        }
+        notifyUpdate(entry, DownloadService.NOTIFY_COMPLETED);
     }
 
     public void pause() {
@@ -79,5 +64,14 @@ public class DownloadTask implements Runnable {
 
     public void cancel() {
         isCanceled = true;
+    }
+
+    private void notifyUpdate(DownloadEntry entry, int msgWhat) {
+        if(handler != null) {
+            Message msg = handler.obtainMessage();
+            msg.what = msgWhat;
+            msg.obj = entry;
+            handler.sendMessage(msg);
+        }
     }
 }

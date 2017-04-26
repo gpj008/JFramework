@@ -11,6 +11,8 @@ public class Constant {
     public static final int KEY_DOWNLOAD_ACTION_PAUSE = 2;
     public static final int KEY_DOWNLOAD_ACTION_RESUME = 3;
     public static final int KEY_DOWNLOAD_ACTION_CANCEL = 4;
+    public static final int KEY_DOWNLOAD_ACTION_PAUSE_ALL = 5;
+    public static final int KEY_DOWNLOAD_ACTION_RECOVER_ALL = 6;
 
     public static final int MAX_DOWNLOAD_COUNT = 3;
 }

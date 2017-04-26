@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">JDownloader-Demo</string>
+    <string name="action_pause_all">Pause All</string>
+    <string name="action_recover_all">Recover All</string>
 </resources>

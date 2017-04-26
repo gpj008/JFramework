@@ -22,6 +22,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class DownloadService extends Service {
 
+    public static final int NOTIFY_CONNECTING = 0;
+    public static final int NOTIFY_DOWNLOADING = 1;
+    public static final int NOTIFY_UPDATING = 2;
+    public static final int NOTIFY_PAUSED_OR_CANCELLED = 3;
+    public static final int NOTIFY_COMPLETED = 4;
+
     private Map<String, DownloadTask> mDownloadingTasks;
     private ExecutorService mExecutors;
     private LinkedBlockingDeque<DownloadEntry> mWaitingQueue = new LinkedBlockingDeque<>();
@@ -30,10 +36,9 @@ public class DownloadService extends Service {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             DownloadEntry entry = (DownloadEntry) msg.obj;
-            switch (entry.status) {
-                case OnPause:
-                case OnComplete:
-                case OnCancel:
+            switch (msg.what) {
+                case NOTIFY_PAUSED_OR_CANCELLED:
+                case NOTIFY_COMPLETED:
                     checkAndDoNext(entry);
                     break;
             }
@@ -76,6 +81,12 @@ public class DownloadService extends Service {
                 break;
             case Constant.KEY_DOWNLOAD_ACTION_CANCEL:
                 cancelDownload(entry);
+                break;
+            case Constant.KEY_DOWNLOAD_ACTION_PAUSE_ALL:
+                pauseAll();
+                break;
+            case Constant.KEY_DOWNLOAD_ACTION_RECOVER_ALL:
+                recoverAll();
                 break;
         }
     }
@@ -128,5 +139,13 @@ public class DownloadService extends Service {
             entry.status = DownloadEntry.DownloadStatus.OnCancel;
             DataChanger.getInstance().postStatus(entry);
         }
+    }
+
+    private void pauseAll() {
+
+    }
+
+    private void recoverAll() {
+
     }
 }

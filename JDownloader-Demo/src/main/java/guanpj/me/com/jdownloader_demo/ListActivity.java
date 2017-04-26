@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -126,5 +128,28 @@ public class ListActivity extends AppCompatActivity {
     private static class ViewHolder {
         TextView mTitleView;
         Button mDownloadBtn;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            if (item.getTitle().equals("pause all")) {
+                item.setTitle(R.string.action_recover_all);
+                mDownloadManager.pauseAll();
+            } else {
+                item.setTitle(R.string.action_pause_all);
+                mDownloadManager.recoverAll();
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

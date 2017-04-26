@@ -51,6 +51,18 @@ public class DownloadManager {
         mContext.startService(intent);
     }
 
+    public void pauseAll() {
+        Intent intent = new Intent(mContext, DownloadService.class);
+        intent.putExtra(Constant.KEY_DOWNLOAD_ACTION, Constant.KEY_DOWNLOAD_ACTION_PAUSE_ALL);
+        mContext.startService(intent);
+    }
+
+    public void recoverAll() {
+        Intent intent = new Intent(mContext, DownloadService.class);
+        intent.putExtra(Constant.KEY_DOWNLOAD_ACTION, Constant.KEY_DOWNLOAD_ACTION_RECOVER_ALL);
+        mContext.startService(intent);
+    }
+
     public void addObserver(DataWatcher wacther) {
         DataChanger.getInstance().addObserver(wacther);
     }
