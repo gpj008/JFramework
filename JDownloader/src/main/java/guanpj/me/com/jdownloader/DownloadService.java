@@ -8,7 +8,9 @@ import android.os.Message;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -142,10 +144,23 @@ public class DownloadService extends Service {
     }
 
     private void pauseAll() {
-
+        while (mWaitingQueue.iterator().hasNext()) {
+            DownloadEntry entry = mWaitingQueue.poll();
+            entry.status = DownloadEntry.DownloadStatus.OnPause;
+            DataChanger.getInstance().postStatus(entry);
+        }
+        for(Map.Entry<String, DownloadTask> entry : mDownloadingTasks.entrySet()) {
+            entry.getValue().pause();
+        }
+        mDownloadingTasks.clear();
     }
 
     private void recoverAll() {
-
+        ArrayList<DownloadEntry> recoverableEntries = DataChanger.getInstance().getRecoverableEntries();
+        if(recoverableEntries != null && recoverableEntries.size() > 0) {
+            for (DownloadEntry recoverableEntry : recoverableEntries) {
+                addDownload(recoverableEntry);
+            }
+        }
     }
 }

@@ -11,6 +11,8 @@ public class DownloadManager {
 
     private static DownloadManager mInstance;
     private final Context mContext;
+    private long mLastOperatedTime = 0;
+    private static final int MIN_OPERATE_INTERVAL = 1000 * 1;
 
     private DownloadManager(Context context) {
         mContext = context;
@@ -23,7 +25,18 @@ public class DownloadManager {
         return mInstance;
     }
 
+    private boolean checkIfExecutable() {
+        long tmp = System.currentTimeMillis();
+        if (tmp - mLastOperatedTime > MIN_OPERATE_INTERVAL) {
+            mLastOperatedTime = tmp;
+            return true;
+        }
+        return false;
+    }
+
     public void add(DownloadEntry entry) {
+        if (!checkIfExecutable())
+            return;
         Intent intent = new Intent(mContext, DownloadService.class);
         intent.putExtra(Constant.KEY_DOWNLOAD_ENTRY, entry);
         intent.putExtra(Constant.KEY_DOWNLOAD_ACTION, Constant.KEY_DOWNLOAD_ACTION_ADD);
@@ -31,6 +44,8 @@ public class DownloadManager {
     }
 
     public void pause(DownloadEntry entry) {
+        if (!checkIfExecutable())
+            return;
         Intent intent = new Intent(mContext, DownloadService.class);
         intent.putExtra(Constant.KEY_DOWNLOAD_ENTRY, entry);
         intent.putExtra(Constant.KEY_DOWNLOAD_ACTION, Constant.KEY_DOWNLOAD_ACTION_PAUSE);
@@ -38,6 +53,8 @@ public class DownloadManager {
     }
 
     public void resume(DownloadEntry entry) {
+        if (!checkIfExecutable())
+            return;
         Intent intent = new Intent(mContext, DownloadService.class);
         intent.putExtra(Constant.KEY_DOWNLOAD_ENTRY, entry);
         intent.putExtra(Constant.KEY_DOWNLOAD_ACTION, Constant.KEY_DOWNLOAD_ACTION_RESUME);
@@ -45,6 +62,8 @@ public class DownloadManager {
     }
 
     public void cancel(DownloadEntry entry) {
+        if (!checkIfExecutable())
+            return;
         Intent intent = new Intent(mContext, DownloadService.class);
         intent.putExtra(Constant.KEY_DOWNLOAD_ENTRY, entry);
         intent.putExtra(Constant.KEY_DOWNLOAD_ACTION, Constant.KEY_DOWNLOAD_ACTION_CANCEL);
@@ -52,12 +71,16 @@ public class DownloadManager {
     }
 
     public void pauseAll() {
+        if (!checkIfExecutable())
+            return;
         Intent intent = new Intent(mContext, DownloadService.class);
         intent.putExtra(Constant.KEY_DOWNLOAD_ACTION, Constant.KEY_DOWNLOAD_ACTION_PAUSE_ALL);
         mContext.startService(intent);
     }
 
     public void recoverAll() {
+        if (!checkIfExecutable())
+            return;
         Intent intent = new Intent(mContext, DownloadService.class);
         intent.putExtra(Constant.KEY_DOWNLOAD_ACTION, Constant.KEY_DOWNLOAD_ACTION_RECOVER_ALL);
         mContext.startService(intent);

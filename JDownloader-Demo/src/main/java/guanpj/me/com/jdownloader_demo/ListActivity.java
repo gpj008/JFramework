@@ -138,10 +138,8 @@ public class ListActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            if (item.getTitle().equals("pause all")) {
+        if (item.getItemId() == R.id.action_settings) {
+            if (item.getTitle().equals("Pause All")) {
                 item.setTitle(R.string.action_recover_all);
                 mDownloadManager.pauseAll();
             } else {
