@@ -5,18 +5,15 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.annotation.IntDef;
-import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
+
+import guanpj.me.com.jdownloader.db.DBControler;
 
 /**
  * Created by Jie on 2017/4/23.
@@ -32,7 +29,9 @@ public class DownloadService extends Service {
 
     private Map<String, DownloadTask> mDownloadingTasks;
     private ExecutorService mExecutors;
-    private LinkedBlockingDeque<DownloadEntry> mWaitingQueue = new LinkedBlockingDeque<>();
+    private LinkedBlockingDeque<DownloadEntry> mWaitingQueue;
+    private DataChanger mDataChanger;
+    private DBControler mDBControler;
     private Handler mHander = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -44,7 +43,7 @@ public class DownloadService extends Service {
                     checkAndDoNext(entry);
                     break;
             }
-            DataChanger.getInstance().postStatus(entry);
+            DataChanger.getInstance(getApplicationContext()).postStatus(entry);
         }
     };
 
@@ -58,6 +57,21 @@ public class DownloadService extends Service {
         super.onCreate();
         mDownloadingTasks = new HashMap<>();
         mExecutors = Executors.newCachedThreadPool();
+        mWaitingQueue = new LinkedBlockingDeque<>();
+        mDataChanger = DataChanger.getInstance(getApplicationContext());
+        mDBControler = DBControler.getInstance(getApplicationContext());
+
+        ArrayList<DownloadEntry> downloadEntries = mDBControler.queryAll();
+        if(downloadEntries != null && downloadEntries.size() > 0) {
+            for (DownloadEntry downloadEntry : downloadEntries) {
+                if(downloadEntry.status == DownloadEntry.DownloadStatus.OnDownload ||
+                        downloadEntry.status == DownloadEntry.DownloadStatus.OnIdle) {
+                    downloadEntry.status = DownloadEntry.DownloadStatus.OnPause;
+                    addDownload(downloadEntry);
+                }
+                mDataChanger.addDownloadEntry(downloadEntry.id, downloadEntry);
+            }
+        }
     }
 
     @Override
@@ -105,7 +119,7 @@ public class DownloadService extends Service {
         if(mDownloadingTasks.size() >= Constant.MAX_DOWNLOAD_COUNT) {
             mWaitingQueue.offer(entry);
             entry.status = DownloadEntry.DownloadStatus.OnWait;
-            DataChanger.getInstance().postStatus(entry);
+            mDataChanger.postStatus(entry);
         } else {
             startDownload(entry);
         }
@@ -124,7 +138,7 @@ public class DownloadService extends Service {
         } else {
             mWaitingQueue.remove(entry);
             entry.status = DownloadEntry.DownloadStatus.OnPause;
-            DataChanger.getInstance().postStatus(entry);
+            mDataChanger.postStatus(entry);
         }
     }
 
@@ -139,7 +153,7 @@ public class DownloadService extends Service {
         } else {
             mWaitingQueue.remove(entry);
             entry.status = DownloadEntry.DownloadStatus.OnCancel;
-            DataChanger.getInstance().postStatus(entry);
+            mDataChanger.postStatus(entry);
         }
     }
 
@@ -147,7 +161,7 @@ public class DownloadService extends Service {
         while (mWaitingQueue.iterator().hasNext()) {
             DownloadEntry entry = mWaitingQueue.poll();
             entry.status = DownloadEntry.DownloadStatus.OnPause;
-            DataChanger.getInstance().postStatus(entry);
+            mDataChanger.postStatus(entry);
         }
         for(Map.Entry<String, DownloadTask> entry : mDownloadingTasks.entrySet()) {
             entry.getValue().pause();
@@ -156,7 +170,7 @@ public class DownloadService extends Service {
     }
 
     private void recoverAll() {
-        ArrayList<DownloadEntry> recoverableEntries = DataChanger.getInstance().getRecoverableEntries();
+        ArrayList<DownloadEntry> recoverableEntries = DataChanger.getInstance(getApplicationContext()).getRecoverableDownloadEntries();
         if(recoverableEntries != null && recoverableEntries.size() > 0) {
             for (DownloadEntry recoverableEntry : recoverableEntries) {
                 addDownload(recoverableEntry);

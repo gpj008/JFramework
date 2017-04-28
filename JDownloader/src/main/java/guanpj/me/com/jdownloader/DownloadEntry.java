@@ -1,12 +1,29 @@
 package guanpj.me.com.jdownloader;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
 import java.io.Serializable;
 
 /**
  * Created by Jie on 2017/4/23.
  */
 
+@DatabaseTable(tableName = "downloadentry")
 public class DownloadEntry implements Serializable {
+
+    @DatabaseField(id = true)
+    public String id;
+    @DatabaseField
+    public String name;
+    @DatabaseField
+    public String url;
+    @DatabaseField
+    public DownloadStatus status = DownloadStatus.OnIdle;
+    @DatabaseField
+    public int currentLength;
+    @DatabaseField
+    public int totalLength;
 
     public DownloadEntry() {
 
@@ -19,14 +36,6 @@ public class DownloadEntry implements Serializable {
     }
 
     public enum DownloadStatus{OnIdle, OnWait, OnConnect, OnDownload, OnPause, OnResume, OnComplete, OnCancel, OnError}
-
-    public String id;
-    public String name;
-    public String url;
-
-    public DownloadStatus status = DownloadStatus.OnIdle;
-    public int currentLength;
-    public int totalLength;
 
     @Override
     public boolean equals(Object obj) {

@@ -60,6 +60,14 @@ public class ListActivity extends AppCompatActivity {
         mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150706/5a9bec48b764a892df801424278a4285/com.mt.mtxx.mtxx_434.apk"));
         mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150707/2ef5e16e0b8b3135aa714ad9b56b9a3d/com.happyelements.AndroidAnimal_25.apk"));
         mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150716/aea8ca0e6617b0989d3dcce0bb9877d5/com.cmge.xianjian.a360_30.apk"));
+        DownloadEntry entry = null;
+        for (int i = 0; i < mData.size(); i++) {
+            entry = mDownloadManager.getDownloadEntry(mData.get(i).id);
+            if(null != entry) {
+                mData.remove(i);
+                mData.add(i, entry);
+            }
+        }
         mAdapter = new MyAdapter();
         mAppList.setAdapter(mAdapter);
     }
