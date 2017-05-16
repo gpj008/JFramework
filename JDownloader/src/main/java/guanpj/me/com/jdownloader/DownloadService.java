@@ -26,6 +26,7 @@ public class DownloadService extends Service {
     public static final int NOTIFY_UPDATING = 2;
     public static final int NOTIFY_PAUSED_OR_CANCELLED = 3;
     public static final int NOTIFY_COMPLETED = 4;
+    public static final int NOTIFY_ERROR = 5;
 
     private Map<String, DownloadTask> mDownloadingTasks;
     private ExecutorService mExecutors;
@@ -126,9 +127,8 @@ public class DownloadService extends Service {
     }
 
     private void startDownload(DownloadEntry entry) {
-        DownloadTask task = new DownloadTask(entry, mHander);
+        DownloadTask task = new DownloadTask(entry, mExecutors, mHander);
         mDownloadingTasks.put(entry.id, task);
-        mExecutors.execute(task);
     }
 
     private void pauseDownload(DownloadEntry entry) {

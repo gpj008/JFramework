@@ -50,6 +50,14 @@ public class ConnectThread implements Runnable {
         }
     }
 
+    public void cancel() {
+        Thread.currentThread().interrupt();
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
     public interface ConnectListener{
         void onConnect(boolean isSupportRange, int totalLength);
         void onError(String errorMessage);

@@ -24,6 +24,8 @@ public class DownloadEntry implements Serializable {
     public int currentLength;
     @DatabaseField
     public int totalLength;
+    @DatabaseField
+    public boolean isSupportRange;
 
     public DownloadEntry() {
 

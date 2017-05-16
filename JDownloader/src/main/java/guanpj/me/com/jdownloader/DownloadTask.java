@@ -3,28 +3,32 @@ package guanpj.me.com.jdownloader;
 import android.os.Handler;
 import android.os.Message;
 
+import java.util.concurrent.ExecutorService;
+
 /**
  * Created by Jie on 2017/4/23.
  */
 
-public class DownloadTask implements Runnable {
+public class DownloadTask implements ConnectThread.ConnectListener {
 
     private final DownloadEntry entry;
+    private final ExecutorService mExecutor;
     private Handler handler;
     private volatile boolean  isPaused = false;
     private volatile boolean isCanceled = false;
+    private ConnectThread mConnectThread;
 
-    public DownloadTask(DownloadEntry entry, Handler handler) {
+    public DownloadTask(DownloadEntry entry, ExecutorService executor, Handler handler) {
         this.entry = entry;
+        this.mExecutor = executor;
         this.handler = handler;
     }
 
-    @Override
-    public void run() {
-        start();
-    }
-
     public void start() {
+        notifyUpdate(entry, DownloadService.NOTIFY_CONNECTING);
+        mConnectThread = new ConnectThread(entry.url, this);
+        mExecutor.execute(mConnectThread);
+
         entry.status = DownloadEntry.DownloadStatus.OnDownload;
         notifyUpdate(entry, DownloadService.NOTIFY_DOWNLOADING);
 
@@ -56,6 +60,10 @@ public class DownloadTask implements Runnable {
 
     public void pause() {
         isPaused = true;
+        isCanceled = true;
+        if(mConnectThread != null && mConnectThread.isRunning()) {
+            mConnectThread.cancel();
+        }
     }
 
     public void resume() {
@@ -64,6 +72,9 @@ public class DownloadTask implements Runnable {
 
     public void cancel() {
         isCanceled = true;
+        if(mConnectThread != null && mConnectThread.isRunning()) {
+            mConnectThread.cancel();
+        }
     }
 
     private void notifyUpdate(DownloadEntry entry, int msgWhat) {
@@ -73,5 +84,17 @@ public class DownloadTask implements Runnable {
             msg.obj = entry;
             handler.sendMessage(msg);
         }
+    }
+
+    @Override
+    public void onConnect(boolean isSupportRange, int totalLength) {
+        entry.isSupportRange = isSupportRange;
+        entry.totalLength = totalLength;
+    }
+
+    @Override
+    public void onError(String errorMessage) {
+        entry.status = DownloadEntry.DownloadStatus.OnError;
+        notifyUpdate(entry, DownloadService.NOTIFY_ERROR);
     }
 }
