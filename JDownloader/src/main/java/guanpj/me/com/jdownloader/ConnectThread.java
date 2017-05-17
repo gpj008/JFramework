@@ -22,17 +22,17 @@ public class ConnectThread implements Runnable {
     @Override
     public void run() {
         isRunning = true;
-        HttpURLConnection conn = null;
+        HttpURLConnection connection = null;
         boolean isSupportRange = false;
         try {
-            conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setRequestMethod("GET");
-            conn.setReadTimeout(Constant.READ_TIMEOUT);
-            conn.setConnectTimeout(Constant.CONNECT_TIMEOUT);
-            int responseCode = conn.getResponseCode();
-            int contentLength = conn.getContentLength();
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setReadTimeout(Constant.READ_TIMEOUT);
+            connection.setConnectTimeout(Constant.CONNECT_TIMEOUT);
+            int responseCode = connection.getResponseCode();
+            int contentLength = connection.getContentLength();
             if(responseCode == HttpURLConnection.HTTP_OK) {
-                if("bytes".equals(conn.getHeaderField("Accept-Ranges"))) {
+                if("bytes".equals(connection.getHeaderField("Accept-Ranges"))) {
                     isSupportRange = true;
                 }
                 listener.onConnect(isSupportRange, contentLength);
@@ -44,8 +44,8 @@ public class ConnectThread implements Runnable {
             isRunning = false;
             listener.onError(e.getMessage());
         } finally {
-            if(conn != null) {
-                conn.disconnect();
+            if(connection != null) {
+                connection.disconnect();
             }
         }
     }

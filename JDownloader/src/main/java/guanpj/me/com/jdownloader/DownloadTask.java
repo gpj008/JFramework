@@ -86,10 +86,35 @@ public class DownloadTask implements ConnectThread.ConnectListener {
         }
     }
 
+    private void startMultiThreadDownload() {
+        int block = entry.totalLength / Constant.MAX_DOWNLOAD_THREAD;
+        int startPos = 0, endPos = 0;
+        for (int i = 0; i < Constant.MAX_DOWNLOAD_THREAD; i++) {
+            startPos = i * block;
+            if(i == Constant.MAX_DOWNLOAD_THREAD - 1) {
+                endPos = entry.totalLength;
+            } else {
+                endPos = (i + 1) * block;
+            }
+            DownloadThread downloadThread = new DownloadThread(entry.url, startPos, endPos);
+            mExecutor.execute(downloadThread);
+        }
+    }
+
+    private void startSingleThreadDownload() {
+
+    }
+
     @Override
     public void onConnect(boolean isSupportRange, int totalLength) {
         entry.isSupportRange = isSupportRange;
         entry.totalLength = totalLength;
+
+        if(entry.isSupportRange) {
+            startMultiThreadDownload();
+        } else {
+            startSingleThreadDownload();
+        }
     }
 
     @Override

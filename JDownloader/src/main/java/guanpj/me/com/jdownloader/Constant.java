@@ -15,6 +15,7 @@ public class Constant {
     public static final int KEY_DOWNLOAD_ACTION_RECOVER_ALL = 6;
 
     public static final int MAX_DOWNLOAD_COUNT = 3;
+    public static final int MAX_DOWNLOAD_THREAD = 3;
     public static final int READ_TIMEOUT = 10 * 1000;
     public static final int CONNECT_TIMEOUT = 10 * 1000;
 }
