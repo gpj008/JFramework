@@ -5,7 +5,7 @@ android {
     buildToolsVersion "25.0.2"
 
     defaultConfig {
-        applicationId "guanpj.me.com.jdownloader_demo"
+        applicationId "com.me.guanpj.jdownloader.demo"
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
