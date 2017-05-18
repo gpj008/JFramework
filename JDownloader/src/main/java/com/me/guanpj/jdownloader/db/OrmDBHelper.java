@@ -6,10 +6,9 @@ import android.database.sqlite.SQLiteDatabase;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import com.me.guanpj.jdownloader.DownloadEntry;
 
 import java.sql.SQLException;
-
-import guanpj.me.com.jdownloader.DownloadEntry;
 
 /**
  * Created by Jie on 2017/4/29.

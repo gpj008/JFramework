@@ -20,8 +20,6 @@ import com.me.guanpj.jdownloader.DownloadManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import guanpj.me.com.jdownloader_demo.R;
-
 /**
  * Created by Jie on 2017/4/24.
  */

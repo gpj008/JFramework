@@ -10,8 +10,6 @@ import com.me.guanpj.jdownloader.DownloadEntry;
 import com.me.guanpj.jdownloader.DownloadManager;
 import com.me.guanpj.jdownloader.Trace;
 
-import guanpj.me.com.jdownloader_demo.R;
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private DownloadManager mDownloadManager;
