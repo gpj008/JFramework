@@ -43,8 +43,9 @@ public class DownloadService extends Service {
                 case NOTIFY_COMPLETED:
                     checkAndDoNext(entry);
                     break;
+
             }
-            DataChanger.getInstance(getApplicationContext()).postStatus(entry);
+            mDataChanger.postStatus(entry);
         }
     };
 

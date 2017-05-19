@@ -1,13 +1,11 @@
 package com.me.guanpj.jdownloader;
 
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Phaser;
 
 /**
  * Created by Jie on 2017/4/23.
@@ -27,8 +25,7 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
         this.entry = entry;
         this.mExecutor = executor;
         this.handler = handler;
-        this.desFile = new File(Environment.getExternalStorageDirectory() + File.separator + "gpj"
-            + File.separator + entry.url.substring(entry.url.lastIndexOf("/") + 1));
+        this.desFile = DownloadConfig.getInstance().getDownloadFile(entry.url);
     }
 
     public void start() {
@@ -90,6 +87,11 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
             msg.what = msgWhat;
             msg.obj = entry;
             handler.sendMessage(msg);
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -178,6 +180,7 @@ public class DownloadTask implements ConnectThread.ConnectListener, DownloadThre
 
     @Override
     public void onDownloadError(int index, String message) {
+        Trace.e("onDownloadError:" + message);
         entry.status = DownloadEntry.DownloadStatus.OnError;
         notifyUpdate(entry, DownloadService.NOTIFY_ERROR);
     }
