@@ -13,10 +13,10 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.me.guanpj.jdownloader.DataWatcher;
-import com.me.guanpj.jdownloader.DownloadEntry;
+import com.me.guanpj.jdownloader.notify.DataWatcher;
+import com.me.guanpj.jdownloader.core.DownloadEntry;
 import com.me.guanpj.jdownloader.DownloadManager;
-import com.me.guanpj.jdownloader.Trace;
+import com.me.guanpj.jdownloader.utility.Trace;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.me.guanpj.jdownloader;
+package com.me.guanpj.jdownloader.utility;
 
 import android.util.Log;
 

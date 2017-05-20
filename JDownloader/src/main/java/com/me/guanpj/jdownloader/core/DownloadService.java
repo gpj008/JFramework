@@ -1,4 +1,4 @@
-package com.me.guanpj.jdownloader;
+package com.me.guanpj.jdownloader.core;
 
 import android.app.Service;
 import android.content.Intent;
@@ -6,7 +6,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 
+import com.me.guanpj.jdownloader.DownloadConfig;
+import com.me.guanpj.jdownloader.utility.Constant;
 import com.me.guanpj.jdownloader.db.DBControler;
+import com.me.guanpj.jdownloader.notify.DataChanger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,13 +67,32 @@ public class DownloadService extends Service {
         mDataChanger = DataChanger.getInstance(getApplicationContext());
         mDBControler = DBControler.getInstance(getApplicationContext());
 
+        initDownload();
+    }
+
+    private void initDownload() {
         ArrayList<DownloadEntry> downloadEntries = mDBControler.queryAll();
         if(downloadEntries != null && downloadEntries.size() > 0) {
             for (DownloadEntry downloadEntry : downloadEntries) {
                 if(downloadEntry.status == DownloadEntry.DownloadStatus.OnDownload ||
-                        downloadEntry.status == DownloadEntry.DownloadStatus.OnIdle) {
-                    downloadEntry.status = DownloadEntry.DownloadStatus.OnPause;
+                        downloadEntry.status == DownloadEntry.DownloadStatus.OnWait) {
+                    if(DownloadConfig.getInstance().isRecoverDownloadWhenStart()) {
+                        if(downloadEntry.isSupportRange) {
+                            downloadEntry.status = DownloadEntry.DownloadStatus.OnPause;
+                        } else {
+                            downloadEntry.status = DownloadEntry.DownloadStatus.OnIdle;
+                            downloadEntry.reset();
+                        }
+                    }
                     addDownload(downloadEntry);
+                } else {
+                    if(downloadEntry.isSupportRange) {
+                        downloadEntry.status = DownloadEntry.DownloadStatus.OnPause;
+                    } else {
+                        downloadEntry.status = DownloadEntry.DownloadStatus.OnIdle;
+                        downloadEntry.reset();
+                    }
+                    mDBControler.createOrUpdate(downloadEntry);
                 }
                 mDataChanger.addDownloadEntry(downloadEntry.id, downloadEntry);
             }

@@ -1,4 +1,4 @@
-package com.me.guanpj.jdownloader;
+package com.me.guanpj.jdownloader.utility;
 
 /**
  * Created by Jie on 2017/4/23.

@@ -3,6 +3,12 @@ package com.me.guanpj.jdownloader;
 import android.content.Context;
 import android.content.Intent;
 
+import com.me.guanpj.jdownloader.core.DownloadEntry;
+import com.me.guanpj.jdownloader.core.DownloadService;
+import com.me.guanpj.jdownloader.utility.Constant;
+import com.me.guanpj.jdownloader.notify.DataChanger;
+import com.me.guanpj.jdownloader.notify.DataWatcher;
+
 /**
  * Created by Jie on 2017/4/23.
  */

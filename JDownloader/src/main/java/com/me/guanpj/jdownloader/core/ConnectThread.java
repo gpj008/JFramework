@@ -1,4 +1,6 @@
-package com.me.guanpj.jdownloader;
+package com.me.guanpj.jdownloader.core;
+
+import com.me.guanpj.jdownloader.utility.Constant;
 
 import java.net.HttpURLConnection;
 import java.net.URL;

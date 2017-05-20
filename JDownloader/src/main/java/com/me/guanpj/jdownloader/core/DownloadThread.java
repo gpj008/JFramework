@@ -1,8 +1,9 @@
-package com.me.guanpj.jdownloader;
+package com.me.guanpj.jdownloader.core;
+
+import com.me.guanpj.jdownloader.utility.Constant;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;

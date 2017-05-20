@@ -1,7 +1,5 @@
 package com.me.guanpj.jdownloader.utility;
 
-import com.me.guanpj.jdownloader.Trace;
-
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

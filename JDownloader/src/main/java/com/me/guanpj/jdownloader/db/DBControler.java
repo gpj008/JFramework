@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.j256.ormlite.dao.Dao;
-import com.me.guanpj.jdownloader.DownloadEntry;
+import com.me.guanpj.jdownloader.core.DownloadEntry;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

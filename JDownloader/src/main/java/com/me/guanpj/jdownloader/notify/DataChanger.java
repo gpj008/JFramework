@@ -1,7 +1,8 @@
-package com.me.guanpj.jdownloader;
+package com.me.guanpj.jdownloader.notify;
 
 import android.content.Context;
 
+import com.me.guanpj.jdownloader.core.DownloadEntry;
 import com.me.guanpj.jdownloader.db.DBControler;
 
 import java.util.ArrayList;

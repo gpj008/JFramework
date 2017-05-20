@@ -1,9 +1,10 @@
-package com.me.guanpj.jdownloader;
+package com.me.guanpj.jdownloader.core;
 
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.types.IntegerObjectType;
 import com.j256.ormlite.table.DatabaseTable;
+import com.me.guanpj.jdownloader.DownloadConfig;
 
 import java.io.File;
 import java.io.Serializable;

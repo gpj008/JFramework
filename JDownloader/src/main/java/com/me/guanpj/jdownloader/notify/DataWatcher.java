@@ -1,4 +1,6 @@
-package com.me.guanpj.jdownloader;
+package com.me.guanpj.jdownloader.notify;
+
+import com.me.guanpj.jdownloader.core.DownloadEntry;
 
 import java.util.Observable;
 import java.util.Observer;
