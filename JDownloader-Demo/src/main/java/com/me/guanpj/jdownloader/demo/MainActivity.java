@@ -21,9 +21,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected void notifyUpdate(DownloadEntry object) {
             entry = object;
-            if(entry.status == DownloadEntry.DownloadStatus.OnCancel) {
-                entry = null;
-            }
             Trace.e(object.toString());
         }
     };
@@ -60,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             entry = new DownloadEntry();
             entry.id = "1";
             entry.name = "gpj";
-            entry.url = "http://api.stay4it.com/uploads/test.jpg";
+            entry.url = "http://shouji.360tpcdn.com/150723/de6fd89a346e304f66535b6d97907563/com.sina.weibo_2057.apk";
         }
         switch (v.getId()) {
             case R.id.btn_start:

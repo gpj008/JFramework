@@ -33,7 +33,7 @@ public class DownloadService extends Service {
     private LinkedBlockingDeque<DownloadEntry> mWaitingQueue;
     private DataChanger mDataChanger;
     private DBControler mDBControler;
-    private Handler mHander = new Handler() {
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -41,6 +41,7 @@ public class DownloadService extends Service {
             switch (msg.what) {
                 case NOTIFY_PAUSED_OR_CANCELLED:
                 case NOTIFY_COMPLETED:
+                case NOTIFY_ERROR:
                     checkAndDoNext(entry);
                     break;
 
@@ -78,11 +79,18 @@ public class DownloadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        DownloadEntry entry = (DownloadEntry) intent.getSerializableExtra(Constant.KEY_DOWNLOAD_ENTRY);
-        int action = intent.getIntExtra(Constant.KEY_DOWNLOAD_ACTION, -1);
-        if(action != -1) {
-            doAction(action, entry);
+        if(intent != null) {
+            DownloadEntry entry = (DownloadEntry) intent.getSerializableExtra(Constant.KEY_DOWNLOAD_ENTRY);
+            if(null != entry && mDataChanger.containsDownloadEntry(entry.id)) {
+                entry = mDataChanger.getDownloadEntry(entry.id);
+            }
+
+            int action = intent.getIntExtra(Constant.KEY_DOWNLOAD_ACTION, -1);
+            if(action != -1) {
+                doAction(action, entry);
+            }
         }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -128,7 +136,7 @@ public class DownloadService extends Service {
     }
 
     private void startDownload(DownloadEntry entry) {
-        DownloadTask task = new DownloadTask(entry, mExecutors, mHander);
+        DownloadTask task = new DownloadTask(entry, mExecutors, mHandler);
         task.start();
         mDownloadingTasks.put(entry.id, task);
     }

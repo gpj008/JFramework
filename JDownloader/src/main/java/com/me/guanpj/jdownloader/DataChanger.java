@@ -62,6 +62,4 @@ public class DataChanger extends Observable {
     public boolean containsDownloadEntry(String id) {
         return mDownloadEntries.containsKey(id);
     }
-
-
 }

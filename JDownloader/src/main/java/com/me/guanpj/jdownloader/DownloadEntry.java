@@ -5,6 +5,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.types.IntegerObjectType;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 
@@ -42,6 +43,16 @@ public class DownloadEntry implements Serializable {
         this.url = url;
         this.id = url;
         this.name = url.substring(url.lastIndexOf("/") + 1);
+    }
+
+    public void reset() {
+        currentLength = 0;
+        ranges = null;
+        downloadPercent = 0;
+        File file = DownloadConfig.getInstance().getDownloadFile(url);
+        if (file.exists()){
+            file.delete();
+        }
     }
 
     public enum DownloadStatus{OnIdle, OnWait, OnConnect, OnDownload, OnPause, OnResume, OnComplete, OnCancel, OnError}

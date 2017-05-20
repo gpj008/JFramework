@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.me.guanpj.jdownloader.DataWatcher;
 import com.me.guanpj.jdownloader.DownloadEntry;
 import com.me.guanpj.jdownloader.DownloadManager;
+import com.me.guanpj.jdownloader.Trace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ public class ListActivity extends AppCompatActivity {
                 mData.add(index, object);
                 mAdapter.notifyDataSetChanged();
             }
+            Trace.e(object.toString());
         }
     };
 

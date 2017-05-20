@@ -31,6 +31,6 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void jump() {
-        startActivity(new Intent(this, ListActivity.class));
+        startActivity(new Intent(this, MainActivity.class));
     }
 }

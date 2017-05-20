@@ -34,14 +34,14 @@ public class ConnectThread implements Runnable {
                 if("bytes".equals(connection.getHeaderField("Accept-Ranges"))) {
                     isSupportRange = true;
                 }
-                listener.onConnect(isSupportRange, contentLength);
+                listener.onConnectSuccess(isSupportRange, contentLength);
             } else {
-                listener.onError("server error:" + responseCode);
+                listener.onConnectError("server error:" + responseCode);
             }
             isRunning = false;
         } catch (Exception e) {
             isRunning = false;
-            listener.onError(e.getMessage());
+            listener.onConnectError(e.getMessage());
         } finally {
             if(connection != null) {
                 connection.disconnect();
@@ -58,7 +58,7 @@ public class ConnectThread implements Runnable {
     }
 
     public interface ConnectListener{
-        void onConnect(boolean isSupportRange, int totalLength);
-        void onError(String errorMessage);
+        void onConnectSuccess(boolean isSupportRange, int totalLength);
+        void onConnectError(String errorMessage);
     }
 }
