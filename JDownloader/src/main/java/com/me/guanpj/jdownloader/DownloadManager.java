@@ -9,6 +9,8 @@ import com.me.guanpj.jdownloader.utility.Constant;
 import com.me.guanpj.jdownloader.notify.DataChanger;
 import com.me.guanpj.jdownloader.notify.DataWatcher;
 
+import java.io.File;
+
 /**
  * Created by Jie on 2017/4/23.
  */
@@ -103,5 +105,18 @@ public class DownloadManager {
 
     public DownloadEntry getDownloadEntry(String id) {
         return DataChanger.getInstance(mContext).getDownloadEntry(id);
+    }
+
+    public boolean containsDownloadEntry(String id) {
+        return DataChanger.getInstance(mContext).containsDownloadEntry(id);
+    }
+
+    public void deleteDownloadEntry(boolean forceDelete, String id) {
+        DataChanger.getInstance(mContext).deleteDownloadEntry(id);
+        if (forceDelete){
+            File file = DownloadConfig.getInstance().getDownloadFile(id);
+            if (file.exists())
+                file.delete();
+        }
     }
 }

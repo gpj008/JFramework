@@ -3,7 +3,7 @@ package com.me.guanpj.jdownloader.notify;
 import android.content.Context;
 
 import com.me.guanpj.jdownloader.core.DownloadEntry;
-import com.me.guanpj.jdownloader.db.DBControler;
+import com.me.guanpj.jdownloader.db.DBController;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -34,7 +34,7 @@ public class DataChanger extends Observable {
 
     public void postStatus(DownloadEntry entry) {
         mDownloadEntries.put(entry.id, entry);
-        DBControler.getInstance(mContext).createOrUpdate(entry);
+        DBController.getInstance(mContext).createOrUpdate(entry);
         setChanged();
         notifyObservers(entry);
     }
@@ -62,5 +62,10 @@ public class DataChanger extends Observable {
 
     public boolean containsDownloadEntry(String id) {
         return mDownloadEntries.containsKey(id);
+    }
+
+    public void deleteDownloadEntry(String id){
+        mDownloadEntries.remove(id);
+        DBController.getInstance(mContext).deleteById(id);
     }
 }

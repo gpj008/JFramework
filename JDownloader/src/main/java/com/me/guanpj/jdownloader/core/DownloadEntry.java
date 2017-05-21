@@ -56,7 +56,7 @@ public class DownloadEntry implements Serializable {
         }
     }
 
-    public enum DownloadStatus{OnIdle, OnWait, OnConnect, OnDownload, OnPause, OnResume, OnComplete, OnCancel, OnError}
+    public enum DownloadStatus{OnIdle, OnWait, OnConnect, OnDownload, OnPause, OnInterrupt, OnResume, OnComplete, OnCancel, OnError}
 
     @Override
     public boolean equals(Object obj) {

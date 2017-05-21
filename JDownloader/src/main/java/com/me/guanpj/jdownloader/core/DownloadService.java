@@ -1,14 +1,20 @@
 package com.me.guanpj.jdownloader.core;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.widget.Toast;
 
 import com.me.guanpj.jdownloader.DownloadConfig;
 import com.me.guanpj.jdownloader.utility.Constant;
-import com.me.guanpj.jdownloader.db.DBControler;
+import com.me.guanpj.jdownloader.db.DBController;
 import com.me.guanpj.jdownloader.notify.DataChanger;
 
 import java.util.ArrayList;
@@ -35,7 +41,8 @@ public class DownloadService extends Service {
     private ExecutorService mExecutors;
     private LinkedBlockingDeque<DownloadEntry> mWaitingQueue;
     private DataChanger mDataChanger;
-    private DBControler mDBControler;
+    private DBController mDBControler;
+    private NetworkStateReceiver mNetworkStateReceiver;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -65,9 +72,17 @@ public class DownloadService extends Service {
         mExecutors = Executors.newCachedThreadPool();
         mWaitingQueue = new LinkedBlockingDeque<>();
         mDataChanger = DataChanger.getInstance(getApplicationContext());
-        mDBControler = DBControler.getInstance(getApplicationContext());
+        mDBControler = DBController.getInstance(getApplicationContext());
 
+        initReceiver();
         initDownload();
+    }
+
+    private void initReceiver() {
+        mNetworkStateReceiver = new NetworkStateReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(mNetworkStateReceiver, filter);
     }
 
     private void initDownload() {
@@ -139,6 +154,12 @@ public class DownloadService extends Service {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mNetworkStateReceiver);
+    }
+
     private void checkAndDoNext(DownloadEntry entry) {
         mDownloadingTasks.remove(entry);
         DownloadEntry nextEntry = mWaitingQueue.poll();
@@ -206,6 +227,44 @@ public class DownloadService extends Service {
         if(recoverableEntries != null && recoverableEntries.size() > 0) {
             for (DownloadEntry recoverableEntry : recoverableEntries) {
                 addDownload(recoverableEntry);
+            }
+        }
+    }
+
+    private void pauseAllByNet() {
+        while (mWaitingQueue.iterator().hasNext()) {
+            DownloadEntry entry = mWaitingQueue.poll();
+            entry.status = DownloadEntry.DownloadStatus.OnInterrupt;
+            mDataChanger.postStatus(entry);
+        }
+        for(Map.Entry<String, DownloadTask> entry : mDownloadingTasks.entrySet()) {
+            entry.getValue().pause();
+        }
+        mDownloadingTasks.clear();
+    }
+
+    private void recoverAllByNet() {
+        ArrayList<DownloadEntry> recoverableEntries = DataChanger.getInstance(getApplicationContext()).getRecoverableDownloadEntries();
+        if(recoverableEntries != null && recoverableEntries.size() > 0) {
+            for (DownloadEntry recoverableEntry : recoverableEntries) {
+                if(recoverableEntry.status == DownloadEntry.DownloadStatus.OnInterrupt) {
+                    addDownload(recoverableEntry);
+                }
+            }
+        }
+    }
+
+    class NetworkStateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            NetworkInfo wifiInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+            if(null != wifiInfo && wifiInfo.isConnected()) {
+                Toast.makeText(context, "WIFI 已连接", Toast.LENGTH_SHORT).show();
+                recoverAllByNet();
+            } else {
+                Toast.makeText(context, "WIFI 已断开", Toast.LENGTH_SHORT).show();
+                pauseAllByNet();
             }
         }
     }

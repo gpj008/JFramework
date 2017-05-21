@@ -1,23 +1,34 @@
 package com.me.guanpj.jdownloader.demo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.Formatter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.me.guanpj.jdownloader.notify.DataWatcher;
-import com.me.guanpj.jdownloader.core.DownloadEntry;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
+import com.google.gson.reflect.TypeToken;
 import com.me.guanpj.jdownloader.DownloadManager;
+import com.me.guanpj.jdownloader.core.DownloadEntry;
+import com.me.guanpj.jdownloader.notify.DataWatcher;
+import com.me.guanpj.jdownloader.utility.Constant;
 import com.me.guanpj.jdownloader.utility.Trace;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,21 +36,17 @@ import java.util.List;
  * Created by Jie on 2017/4/24.
  */
 
-public class ListActivity extends AppCompatActivity {
+public class AppListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private DownloadManager mDownloadManager;
     private ListView mAppList;
     private MyAdapter mAdapter;
-    private List<DownloadEntry> mData;
+    private List<AppEntry> mData;
+    private RequestQueue mQueue;
     private DataWatcher mWatcher = new DataWatcher() {
         @Override
         protected void notifyUpdate(DownloadEntry object) {
-            int index = mData.indexOf(object);
-            if(index != -1) {
-                DownloadEntry entry = mData.remove(index);
-                mData.add(index, object);
-                mAdapter.notifyDataSetChanged();
-            }
+            mAdapter.notifyDataSetChanged();
             Trace.e(object.toString());
         }
     };
@@ -50,28 +57,37 @@ public class ListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_list);
 
         mDownloadManager = DownloadManager.getInstance(this);
+        mQueue = Volley.newRequestQueue(this);
         mAppList = (ListView) findViewById(R.id.app_list);
-        mData = new ArrayList<>();
-        mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150723/de6fd89a346e304f66535b6d97907563/com.sina.weibo_2057.apk"));
-        mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150706/f67f98084d6c788a0f4593f588ea9dfc/com.taobao.taobao_121.apk"));
-        mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150720/789cd3f2facef6b27004d9f813599463/com.mfw.roadbook_147.apk"));
-        mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150810/10805820b9fbe1eeda52be289c682651/com.qihoo.vpnmaster_3019020.apk"));
-        mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150730/580642ffcae5fe8ca311c53bad35bcf2/com.taobao.trip_3001032.apk"));
-        mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150807/42ac3ad85a189125701e69ccff36ad7a/com.eg.android.AlipayGphone_78.apk"));
-        mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150813/9e775b5afb66feb960941cd8879af0b8/com.sankuai.meituan_291.apk"));
-        mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150706/5a9bec48b764a892df801424278a4285/com.mt.mtxx.mtxx_434.apk"));
-        mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150707/2ef5e16e0b8b3135aa714ad9b56b9a3d/com.happyelements.AndroidAnimal_25.apk"));
-        mData.add(new DownloadEntry("http://shouji.360tpcdn.com/150716/aea8ca0e6617b0989d3dcce0bb9877d5/com.cmge.xianjian.a360_30.apk"));
-        DownloadEntry entry = null;
-        for (int i = 0; i < mData.size(); i++) {
-            entry = mDownloadManager.getDownloadEntry(mData.get(i).id);
-            if(null != entry) {
-                mData.remove(i);
-                mData.add(i, entry);
-            }
-        }
+        mAppList.setOnItemClickListener(this);
         mAdapter = new MyAdapter();
         mAppList.setAdapter(mAdapter);
+
+        initData();
+    }
+
+    private void initData() {
+        Type type = new TypeToken<ArrayList<AppEntry>>() {
+        }.getType();
+        String url = "http://api.stay4it.com/v1/public/core/?service=downloader.applist";
+        GsonRequest request = new GsonRequest<ArrayList<AppEntry>>(Request.Method.GET, url,
+                type, new Response.Listener<ArrayList<AppEntry>>() {
+
+            @Override
+            public void onResponse(ArrayList<AppEntry> response) {
+                for (AppEntry appEntry : response) {
+                    Trace.e(appEntry.toString());
+                }
+                mData = response;
+                mAdapter.notifyDataSetChanged();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("TAG", error.getMessage(), error);
+            }
+        });
+        mQueue.add(request);
     }
 
     @Override
@@ -86,22 +102,34 @@ public class ListActivity extends AppCompatActivity {
         mDownloadManager.deleteObserver(mWatcher);
     }
 
-    private class MyAdapter extends BaseAdapter {
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        AppEntry entry = mData.get(position);
+        Intent intent = new Intent(this, AppDetailActivity.class);
+        intent.putExtra(Constant.KEY_APP_ENTRY, entry);
+        startActivity(intent);
+    }
 
+    private class MyAdapter extends BaseAdapter {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder = null;
             if(convertView == null || convertView.getTag() == null) {
-                convertView = LayoutInflater.from(ListActivity.this).inflate(R.layout.activity_list_item, null);
+                convertView = LayoutInflater.from(AppListActivity.this).inflate(R.layout.activity_applist_item, null);
                 holder = new ViewHolder();
                 holder.mTitleView = (TextView) convertView.findViewById(R.id.txt_title);
+                holder.mStatusView = (TextView) convertView.findViewById(R.id.txt_status);
                 holder.mDownloadBtn = (Button) convertView.findViewById(R.id.btn_start);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
             }
-            final DownloadEntry entry = mData.get(position);
-            holder.mTitleView.setText(entry.name + " is " + entry.status + " "
+            final AppEntry appEntry = mData.get(position);
+            final DownloadEntry entry = mDownloadManager.containsDownloadEntry(appEntry.url)
+                    ? mDownloadManager.getDownloadEntry(appEntry.url) : appEntry.generateDownloadEntry();
+            holder.mTitleView.setText(appEntry.name + "  " + appEntry.size + "\n" + appEntry.desc);
+            holder.mStatusView.setTag(entry.id);
+            holder.mStatusView.setText(entry.status + "\n"
                     + Formatter.formatShortFileSize(getApplicationContext(), entry.currentLength)
                     + "/" + Formatter.formatShortFileSize(getApplicationContext(), entry.totalLength));
             holder.mDownloadBtn.setOnClickListener(new View.OnClickListener() {
@@ -121,11 +149,14 @@ public class ListActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return mData.size();
+            if(mData != null) {
+                return mData.size();
+            }
+            return 0;
         }
 
         @Override
-        public DownloadEntry getItem(int position) {
+        public AppEntry getItem(int position) {
             return mData.get(position);
         }
 
@@ -137,6 +168,7 @@ public class ListActivity extends AppCompatActivity {
 
     private static class ViewHolder {
         TextView mTitleView;
+        TextView mStatusView;
         Button mDownloadBtn;
     }
 

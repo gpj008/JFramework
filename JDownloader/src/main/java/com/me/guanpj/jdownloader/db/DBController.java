@@ -13,22 +13,22 @@ import java.util.ArrayList;
  * Created by Jie on 2017/4/29.
  */
 
-public class DBControler {
+public class DBController {
 
-    private static DBControler mInstance;
+    private static DBController mInstance;
     private final Context mContext;
     private OrmDBHelper mHelper;
     private SQLiteDatabase mDB;
 
-    private DBControler(Context context) {
+    private DBController(Context context) {
         mContext = context;
         mHelper = new OrmDBHelper(context);
         mDB = mHelper.getWritableDatabase();
     }
 
-    public synchronized static DBControler getInstance(Context context) {
+    public synchronized static DBController getInstance(Context context) {
         if(mInstance == null) {
-            mInstance = new DBControler(context);
+            mInstance = new DBController(context);
         }
         return mInstance;
     }
