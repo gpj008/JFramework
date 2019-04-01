@@ -71,6 +71,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         request.content = content;
         request.setCallback(new StringCallback() {
             @Override
+            public String preRequest() {
+                return super.preRequest();
+            }
+
+            @Override
             public void onSuccesus(String result) {
                 Log.e("gpj", "testHttpPost return:" + result);
             }

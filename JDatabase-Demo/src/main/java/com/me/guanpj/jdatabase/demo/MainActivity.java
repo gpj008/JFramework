@@ -1,7 +1,8 @@
 package com.me.guanpj.jdatabase.demo;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 
 import com.me.guanpj.jdatabase.DatabaseManager;
@@ -10,9 +11,11 @@ import com.me.guanpj.jdatabase.demo.model.Developer;
 import com.me.guanpj.jdatabase.demo.model.Skill;
 import com.me.guanpj.jdatabase.utility.Trace;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.mDbAddBtn).setOnClickListener(this);
         findViewById(R.id.mDbDeleteBtn).setOnClickListener(this);
         findViewById(R.id.mDbQueryBtn).setOnClickListener(this);
+        myHook(findViewById(R.id.mDbAddBtn));
         DatabaseManager.init(getApplicationContext(), new DatabaseHelper(getApplicationContext()));
     }
 
@@ -98,6 +102,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.mDbDeleteBtn:
                 deleteCompanyById();
                 break;
+        }
+    }
+
+    private void hookOnClickListener(View view) {
+        try {
+            // 得到 View 的 ListenerInfo 对象
+            Method getListenerInfo = View.class.getDeclaredMethod("getListenerInfo");
+            getListenerInfo.setAccessible(true);
+            Object listenerInfo = getListenerInfo.invoke(view);
+            // 得到 原始的 OnClickListener 对象
+            Class<?> listenerInfoClz = Class.forName("android.view.View$ListenerInfo");
+            Field mOnClickListener = listenerInfoClz.getDeclaredField("mOnClickListener");
+            mOnClickListener.setAccessible(true);
+            View.OnClickListener originOnClickListener = (View.OnClickListener) mOnClickListener.get(listenerInfo);
+            // 用自定义的 OnClickListener 替换原始的 OnClickListener
+            View.OnClickListener hookedOnClickListener = new HookedOnClickListener(originOnClickListener);
+            mOnClickListener.set(listenerInfo, hookedOnClickListener);
+        } catch (Exception e) {
+            Log.e("gpj","hook clickListener failed!");
+        }
+    }
+
+    private void myHook(View view) {
+        try {
+            Method getListenerInfo = Class.forName("android.view.View").getDeclaredMethod("getListenerInfo");
+            getListenerInfo.setAccessible(true);
+            Object listener = getListenerInfo.invoke(view);
+
+            Class<?> listenerInfoClz = Class.forName("android.view.View$ListenerInfo");
+            Field onClickListener = listenerInfoClz.getDeclaredField("mOnClickListener");
+            View.OnClickListener originalListener = (View.OnClickListener) onClickListener.get(listener);
+
+            View.OnClickListener hookedListener = new HookedOnClickListener(originalListener);
+            onClickListener.set(listener, hookedListener);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    class HookedOnClickListener implements View.OnClickListener {
+        private View.OnClickListener origin;
+
+        HookedOnClickListener(View.OnClickListener origin) {
+            this.origin = origin;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Log.e("gpj","Before click, do what you want to to.");
+            if (origin != null) {
+                origin.onClick(v);
+            }
+            Log.e("gpj","After click, do what you want to to.");
         }
     }
 }
